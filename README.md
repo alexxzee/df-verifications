@@ -35,6 +35,8 @@ formation/
 | `npm run devis-du-jour` | la page `GET /devis/du-jour`, sur une base de test |
 | `npm run recette` | la durée de validité des devis, contre les décisions du métier |
 | `npm run intersession` | le travail intersession : comportement de `src/legacy/fidelite.js`, tests de `exercices/intersession/`, `docs/ecarts-a-trancher.md` |
+| `npm run fusion` | la grille de décision de `docs/decision-fusion.md` (micro-exercice du ch04) |
+| `npm run anonymat` | le ticket anonymisé de `exercices/confidentialite/ticket-anonymise.txt` (micro-exercice du ch05) |
 
 Un seul vérificateur se lance hors de `df-commandes` : `node ../df-verifications/livraison.js`, depuis le dossier `frais-livraison` de l’application créée en Autopilot, vérifie l’estimateur de frais de livraison.
 
