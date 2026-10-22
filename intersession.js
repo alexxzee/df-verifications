@@ -342,6 +342,6 @@ verifierFilet();
 const rouges = verifierSpec();
 verifierEcarts(rouges);
 console.log(problemes === 0
-  ? 'Bilan : tout est en ordre. Poussez votre travail.'
+  ? 'Bilan : tout est en ordre.'
   : `Bilan : ${problemes} point(s) à reprendre, détaillés ci-dessus.`);
 process.exit(problemes === 0 ? 0 : 1);
