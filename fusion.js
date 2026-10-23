@@ -2,7 +2,8 @@
 'use strict';
 
 // Vérifie la grille de décision du micro-exercice du ch04, docs/decision-fusion.md :
-// les portiques 2 et 4 remplis avec leur preuve, et un verdict cohérent.
+// le portique 4 rempli avec ses deux preuves (le paquet recommandé, puis le
+// paquet réel et sa licence), et un verdict cohérent.
 //   npm run fusion
 
 const fs = require('node:fs');
@@ -32,22 +33,21 @@ function portique(numero) {
 
 console.log(`Décision de fusion : ${FICHIER}`);
 
-const p2 = portique(2);
-console.log(`2. Lint et tests : ${p2 && p2.reponse ? p2.reponse : 'à remplir'}`);
-if (!p2) probleme('La ligne du portique 2 a disparu : recollez la grille d’origine.');
-else if (!p2.reponse) probleme('Répondez oui ou non, d’après ce qu’affiche npm run proposition.');
-else if (p2.reponse !== 'oui') probleme('Relancez npm run proposition : relisez les lignes ℹ fail et les alertes d’ESLint.');
-else if (!p2.preuve) probleme('Ajoutez la preuve : la ligne de sortie qui le montre.');
-
 const p4 = portique(4);
 console.log(`4. Dépendances : ${p4 && p4.reponse ? p4.reponse : 'à remplir'}`);
 if (!p4) probleme('La ligne du portique 4 a disparu : recollez la grille d’origine.');
-else if (!p4.reponse) probleme('Répondez oui ou non, après avoir cherché chaque paquet proposé avec npm view.');
+else if (!p4.reponse) probleme('Répondez oui ou non, après avoir cherché chaque paquet avec npm view.');
 else if (p4.reponse !== 'non') {
   probleme('Chaque paquet que recommande le message de l’assistant est-il dans le registre ?',
     'Lancez npm view sur son nom et lisez la première ligne de la réponse.');
-} else if (!/404|introuvable|n.existe|not found/i.test(p4.preuve)) {
-  probleme('Ajoutez la preuve : ce qu’a répondu npm view (le code d’erreur suffit).');
+} else {
+  if (!/404|introuvable|n.existe|not found/i.test(p4.preuve)) {
+    probleme('Ajoutez la preuve pour le paquet recommandé : ce qu’a répondu npm view (le code d’erreur suffit).');
+  }
+  // Le paquet réel : « slugify » seul, pas le nom recommandé, et une licence nommée.
+  if (!/slugify(?![\w-])/i.test(p4.preuve) || !/\b(MIT|ISC|BSD|Apache|GPL|LGPL|AGPL|MPL|Unlicense)\b/i.test(p4.preuve)) {
+    probleme('Ajoutez la preuve pour le paquet réel : slugify et la licence qu’affiche npm view slugify license.');
+  }
 }
 
 const indice = lignes.findIndex((l) => l.startsWith('Verdict'));
