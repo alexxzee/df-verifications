@@ -32,14 +32,14 @@ test('aucun hook déclaré : échec, avec la consigne de collage', () => {
   assert.match(r.lignes.join('\n'), /Aucun hook branché/);
 });
 
-test('Claude Code : hook qui protège src/config.js, réussite', () => {
-  const r = verifier(projet({ '.claude/settings.json': claude('Edit|Write|Bash', 'node "$CLAUDE_PROJECT_DIR/scripts/stub.js" src/config.js') }));
+test('Claude Code : hook qui protège test/caracterisation, réussite', () => {
+  const r = verifier(projet({ '.claude/settings.json': claude('Edit|Write|Bash', 'node "$CLAUDE_PROJECT_DIR/scripts/stub.js" test/caracterisation') }));
   assert.equal(r.ok, true, r.lignes.join('\n'));
   assert.equal(r.lignes.filter((l) => l.includes(': refusé.')).length, 2);
 });
 
 test('Claude Code : matcher sans Bash, le terminal passe et la vérification échoue', () => {
-  const r = verifier(projet({ '.claude/settings.json': claude('Edit|Write', 'node scripts/stub.js src/config.js') }));
+  const r = verifier(projet({ '.claude/settings.json': claude('Edit|Write', 'node scripts/stub.js test/caracterisation') }));
   assert.equal(r.ok, false);
   assert.match(r.lignes.join('\n'), /outil Bash\) : accepté, le hook ne se déclenche pas/);
 });
@@ -50,7 +50,7 @@ test('Copilot : mauvais chemin protégé, échec', () => {
 });
 
 test('Copilot : script introuvable, le hook plante', () => {
-  const r = verifier(projet({ '.github/hooks/proteger.json': copilot('node scripts/absent.js src/config.js') }));
+  const r = verifier(projet({ '.github/hooks/proteger.json': copilot('node scripts/absent.js test/caracterisation') }));
   assert.equal(r.ok, false);
   assert.match(r.lignes.join('\n'), /le hook plante/);
 });
@@ -62,7 +62,7 @@ test('Codex : JSON invalide signalé', () => {
 });
 
 test('Codex : rappel de l’approbation par /hooks', () => {
-  const r = verifier(projet({ '.codex/hooks.json': claude('apply_patch|Bash', 'node scripts/stub.js src/config.js') }));
+  const r = verifier(projet({ '.codex/hooks.json': claude('apply_patch|Bash', 'node scripts/stub.js test/caracterisation') }));
   assert.equal(r.ok, true, r.lignes.join('\n'));
   assert.match(r.lignes.join('\n'), /\/hooks/);
 });
@@ -84,9 +84,9 @@ test('refus par sortie JSON, au format Copilot ou Claude Code', () => {
 const DF = path.resolve(__dirname, '..', 'df-commandes', 'scripts', 'hooks', 'proteger.js');
 test('blocs de la fiche avec le script réel de df-commandes', { skip: !fs.existsSync(DF) && 'df-commandes absent' }, () => {
   const blocs = {
-    '.claude/settings.json': claude('Edit|Write|Bash', 'node "$CLAUDE_PROJECT_DIR/scripts/hooks/proteger.js" src/config.js'),
-    '.github/hooks/proteger.json': copilot('node scripts/hooks/proteger.js src/config.js'),
-    '.codex/hooks.json': { hooks: { PreToolUse: [{ matcher: 'apply_patch|Bash', hooks: [{ type: 'command', command: 'node scripts/hooks/proteger.js src/config.js', timeout: 10 }] }] } },
+    '.claude/settings.json': claude('Edit|Write|Bash', 'node "$CLAUDE_PROJECT_DIR/scripts/hooks/proteger.js" test/caracterisation'),
+    '.github/hooks/proteger.json': copilot('node scripts/hooks/proteger.js test/caracterisation'),
+    '.codex/hooks.json': { hooks: { PreToolUse: [{ matcher: 'apply_patch|Bash', hooks: [{ type: 'command', command: 'node scripts/hooks/proteger.js test/caracterisation', timeout: 10 }] }] } },
   };
   for (const [fichier, contenu] of Object.entries(blocs)) {
     const racine = projet({ [fichier]: contenu, 'scripts/hooks/proteger.js': fs.readFileSync(DF, 'utf8') });
@@ -107,4 +107,15 @@ test('script réel : lecture, autre fichier et entrée illisible passent (code 0
   assert.equal(code('', 'src/config.js'), 0);
   assert.equal(code(edition), 0);
   assert.equal(code(edition, 'src/config.js'), 2);
+});
+
+test('script réel : un dossier protégé couvre ses fichiers, pas un dossier voisin', { skip: !fs.existsSync(DF) && 'df-commandes absent' }, () => {
+  const { spawnSync } = require('node:child_process');
+  const code = (fichier) => spawnSync(process.execPath, [DF, 'test/caracterisation'], {
+    input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: fichier } }),
+  }).status;
+  assert.equal(code('test/caracterisation/export-commandes.test.js'), 2);
+  assert.equal(code('test/caracterisation/export-attendu.csv'), 2);
+  assert.equal(code('test/caracterisation-bis/a.test.js'), 0);
+  assert.equal(code('test/devis/calcul.test.js'), 0);
 });

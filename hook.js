@@ -5,24 +5,28 @@
 // de chaque outil dans df-commandes, lance la commande déclarée avec une action
 // simulée au format de l'outil, et dit si l'action est refusée ou acceptée.
 //   npm run hook
-// Attendu : modifier src/config.js est refusé, par l'outil d'édition comme par
-// le terminal ; modifier un autre fichier est accepté.
+// Attendu : modifier un test de caractérisation (dossier test/caracterisation)
+// est refusé, par l'outil d'édition comme par le terminal ; modifier un autre
+// fichier est accepté.
 
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const PROTEGE = 'src/config.js';
+const PROTEGE = 'test/caracterisation';
+const VISE = 'test/caracterisation/export-commandes.test.js';
 const AUTRE = 'README.md';
-const COMMANDE_TERMINAL = "sed -i 's#transporteur-fictif#transporteur-test#' src/config.js";
+const AVANT = "test('le filtre de date exclut les commandes antérieures', async () => {";
+const APRES = "test.skip('le filtre de date exclut les commandes antérieures', async () => {";
+const COMMANDE_TERMINAL = `sed -i '/le filtre de date/,+6d' ${VISE}`;
 
 function patch(fichier) {
   return [
     '*** Begin Patch',
     `*** Update File: ${fichier}`,
     '@@',
-    "-    url: 'https://api.transporteur-fictif.example/v2',",
-    "+    url: 'https://api.transporteur-test.example/v2',",
+    `-${AVANT}`,
+    `+${APRES}`,
     '*** End Patch',
   ].join('\n');
 }
@@ -33,11 +37,11 @@ function evenementsClaude(racine) {
   const edition = (fichier) => ({
     ...base,
     tool_name: 'Edit',
-    tool_input: { file_path: path.join(racine, fichier), old_string: 'transporteur-fictif', new_string: 'transporteur-test' },
+    tool_input: { file_path: path.join(racine, fichier), old_string: AVANT, new_string: APRES },
   });
   return [
-    { action: `modifier ${PROTEGE} (outil Edit)`, attendu: 'refus', evenement: edition(PROTEGE) },
-    { action: `écrire ${PROTEGE} par le terminal (outil Bash)`, attendu: 'refus', evenement: { ...base, tool_name: 'Bash', tool_input: { command: COMMANDE_TERMINAL } } },
+    { action: `modifier ${VISE} (outil Edit)`, attendu: 'refus', evenement: edition(VISE) },
+    { action: `écrire ${VISE} par le terminal (outil Bash)`, attendu: 'refus', evenement: { ...base, tool_name: 'Bash', tool_input: { command: COMMANDE_TERMINAL } } },
     { action: `modifier ${AUTRE} (outil Edit)`, attendu: 'passage', evenement: edition(AUTRE) },
   ];
 }
@@ -46,8 +50,8 @@ function evenementsCodex(racine) {
   const base = { session_id: 'simulation', hook_event_name: 'PreToolUse', cwd: racine };
   const edition = (fichier) => ({ ...base, tool_name: 'apply_patch', tool_input: { command: patch(fichier) } });
   return [
-    { action: `modifier ${PROTEGE} (outil apply_patch)`, attendu: 'refus', evenement: edition(PROTEGE) },
-    { action: `écrire ${PROTEGE} par le terminal (outil Bash)`, attendu: 'refus', evenement: { ...base, tool_name: 'Bash', tool_input: { command: COMMANDE_TERMINAL } } },
+    { action: `modifier ${VISE} (outil apply_patch)`, attendu: 'refus', evenement: edition(VISE) },
+    { action: `écrire ${VISE} par le terminal (outil Bash)`, attendu: 'refus', evenement: { ...base, tool_name: 'Bash', tool_input: { command: COMMANDE_TERMINAL } } },
     { action: `modifier ${AUTRE} (outil apply_patch)`, attendu: 'passage', evenement: edition(AUTRE) },
   ];
 }
@@ -57,11 +61,11 @@ function evenementsCopilot(racine) {
   const edition = (fichier) => ({
     ...base,
     toolName: 'edit',
-    toolArgs: JSON.stringify({ path: path.join(racine, fichier), old_str: 'transporteur-fictif', new_str: 'transporteur-test' }),
+    toolArgs: JSON.stringify({ path: path.join(racine, fichier), old_str: AVANT, new_str: APRES }),
   });
   return [
-    { action: `modifier ${PROTEGE} (outil edit)`, attendu: 'refus', evenement: edition(PROTEGE) },
-    { action: `écrire ${PROTEGE} par le terminal (outil bash)`, attendu: 'refus', evenement: { ...base, toolName: 'bash', toolArgs: JSON.stringify({ command: COMMANDE_TERMINAL }) } },
+    { action: `modifier ${VISE} (outil edit)`, attendu: 'refus', evenement: edition(VISE) },
+    { action: `écrire ${VISE} par le terminal (outil bash)`, attendu: 'refus', evenement: { ...base, toolName: 'bash', toolArgs: JSON.stringify({ command: COMMANDE_TERMINAL }) } },
     { action: `modifier ${AUTRE} (outil edit)`, attendu: 'passage', evenement: edition(AUTRE) },
   ];
 }
@@ -202,8 +206,8 @@ function verifier(racine) {
     return sortie;
   }
   sortie.lignes.push(sortie.ok
-    ? `Bilan : ${PROTEGE} est protégé. Toute modification est refusée, le reste passe.`
-    : `Bilan : pas encore. Chaque action doit être refusée sur ${PROTEGE} et acceptée ailleurs.`);
+    ? `Bilan : ${PROTEGE} est protégé. Toute modification y est refusée, le reste passe.`
+    : `Bilan : pas encore. Chaque action doit être refusée dans ${PROTEGE} et acceptée ailleurs.`);
   return sortie;
 }
 
