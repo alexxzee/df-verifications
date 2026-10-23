@@ -37,7 +37,7 @@ formation/
 | `npm run reprise -- ch07` | repartir de l’état prêt d’une étape (remplace le travail en cours de `df-commandes`) |
 | `npm run intersession` | le travail intersession : comportement de `src/legacy/fidelite.js`, tests de `exercices/intersession/`, `docs/ecarts-a-trancher.md` |
 | `npm run fusion` | la grille de décision de `docs/decision-fusion.md` : le portique des dépendances prouvé sur les deux paquets, et un verdict qui suit la grille (micro-exercice du ch04) |
-| `npm run anonymat` | le ticket anonymisé de `exercices/confidentialite/ticket-anonymise.txt` (micro-exercice du ch05) |
+| `npm run anonymat` | le ticket anonymisé et masqué de `exercices/confidentialite/ticket-anonymise.txt` (micro-exercice du ch05) |
 | `npm run hook` | le hook de `.claude/settings.json`, `.github/hooks/` ou `.codex/hooks.json`, sur trois actions simulées au format de l’outil (micro-exercice du ch07) |
 | `npm run failles` | la grille de `docs/failles.md` sur `exercices/failles/import-clients.js` : failles trouvées sur cinq et catégories manquantes, sans citer de ligne (micro-exercice du ch04) |
 | `npm run consigne` | la consigne de délégation de `docs/consigne-delegation.md` : cinq rubriques, un fichier qui existe, une commande du `package.json`, aucun renvoi à la conversation (micro-exercice du ch08) |
