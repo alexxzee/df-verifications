@@ -240,7 +240,7 @@ function verifierFilet() {
     return;
   }
   if (!etat) {
-    dire(`2. Filet : ${CARACTERISATION} ne contient encore aucun test (étape 1).`);
+    dire(`2. Filet : ${CARACTERISATION} ne contient encore aucun test.`);
     problemes += 1;
     return;
   }
@@ -280,7 +280,7 @@ function verifierSpec() {
     return 0;
   }
   if (!etat) {
-    dire(`3. Spec : ${SPEC} ne contient encore aucun test (étape 3).`);
+    dire(`3. Spec : ${SPEC} ne contient encore aucun test.`);
     problemes += 1;
     return 0;
   }
