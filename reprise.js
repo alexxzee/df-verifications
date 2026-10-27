@@ -10,7 +10,7 @@
 const { spawnSync } = require('node:child_process');
 
 const DEPOT = 'https://github.com/alexxzee/df-commandes-reprises.git';
-const ETAPES = ['tp2', 'ch03', 'tp3', 'ch06', 'ch07', 'ch08', 'ch09'];
+const ETAPES = ['tp2', 'ch03', 'tp3', 'ch06', 'ch06-revue', 'ch07', 'ch08', 'ch09'];
 
 function commandes(etape) {
   if (!ETAPES.includes(etape)) {

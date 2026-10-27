@@ -26,16 +26,16 @@ test('une étape connue pose les fichiers de la reprise sans toucher à l’hist
 });
 
 // Liste des étapes acceptées.
-// Attendu : exactement tp2, ch03, tp3, ch06, ch07, ch08, ch09, dans cet ordre.
+// Attendu : exactement tp2, ch03, tp3, ch06, ch06-revue, ch07, ch08, ch09, dans cet ordre.
 // Pourquoi : chaque étape doit correspondre à une branche reprise/* existante ;
 // ce test casse si une étape est ajoutée ou retirée sans qu'on le mette à jour.
 test('les étapes sont celles des branches de reprise', () => {
-  assert.deepEqual(ETAPES, ['tp2', 'ch03', 'tp3', 'ch06', 'ch07', 'ch08', 'ch09']);
+  assert.deepEqual(ETAPES, ['tp2', 'ch03', 'tp3', 'ch06', 'ch06-revue', 'ch07', 'ch08', 'ch09']);
 });
 
 // Étape inexistante « ch42 ».
 // Attendu : une erreur dont le message cite l'étape refusée et la liste des étapes valides.
 // Pourquoi : une faute de frappe ne doit lancer aucune commande git et doit dire quoi taper.
 test('une étape inconnue est refusée avec la liste des étapes', () => {
-  assert.throws(() => commandes('ch42'), /Étape inconnue : ch42\. Étapes : tp2, ch03, tp3, ch06, ch07, ch08, ch09/); // message complet, liste comprise
+  assert.throws(() => commandes('ch42'), /Étape inconnue : ch42\. Étapes : tp2, ch03, tp3, ch06, ch06-revue, ch07, ch08, ch09/); // message complet, liste comprise
 });
