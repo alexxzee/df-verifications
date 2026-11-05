@@ -191,7 +191,7 @@ function verifierFichier(outil, fichier, racine, sortie) {
     sortie.lignes.push(libelle(cas, r));
     if (r.issue !== (cas.attendu === 'refus' ? 'refus' : 'passage')) sortie.ok = false;
   }
-  if (outil.nom.startsWith('Codex')) sortie.lignes.push('   Codex n’exécute ce hook qu’après votre approbation : tapez /hooks dans Codex.');
+  if (outil.nom.startsWith('Codex')) sortie.lignes.push('   Codex n’exécute ce hook qu’après votre approbation : /hooks au terminal ; extension : Paramètres Codex, onglet Hooks.');
 }
 
 function verifier(racine) {
