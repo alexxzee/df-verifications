@@ -63,13 +63,33 @@ async function main() {
     return { statut: reponse.status, json };
   }
 
+  // Un code peut enregistrer la date de fin dans le détail du devis, à la création :
+  // le scénario recule alors cette date d'autant que celle du devis.
+  function reculerFinEnregistree(id, date) {
+    const ligne = db.prepare('SELECT detail FROM devis WHERE id = ?').get(id);
+    let detail;
+    try {
+      detail = JSON.parse(ligne.detail);
+    } catch {
+      return;
+    }
+    if (!detail || typeof detail.dateFinValidite !== 'string') return;
+    const fin = new Date(`${detail.dateFinValidite}T00:00:00Z`);
+    const ecart = Date.parse(`${jour(0)}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`);
+    detail.dateFinValidite = new Date(fin.getTime() - ecart).toISOString().slice(0, 10);
+    db.prepare('UPDATE devis SET detail = ? WHERE id = ?').run(JSON.stringify(detail), id);
+  }
+
   async function creerDevis(clientId, date) {
     const r = await appeler('POST', '/devis', { clientId, lignes: [{ reference: 'PARP-20', quantite: 4 }] });
     if (r.statut !== 201 || !r.json) {
       quitter([`POST /devis répond ${r.statut} au lieu de 201 : la création de devis est cassée.`,
         'Lancez npm test, corrigez, puis relancez.']);
     }
-    if (date) db.prepare('UPDATE devis SET date = ? WHERE id = ?').run(date, r.json.id);
+    if (date) {
+      db.prepare('UPDATE devis SET date = ? WHERE id = ?').run(date, r.json.id);
+      reculerFinEnregistree(r.json.id, date);
+    }
     return r;
   }
 
